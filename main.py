@@ -10,8 +10,8 @@ import GetData
 from ManipulateScript import GambleScript
 from chromeDriver import GambleDriver
 
-def startAutoGamble(parmList : list ):
 
+def startAutoGamble(parmList: list):
     gambleDriver = GambleDriver("./chromedriver/chromedriver")
     gambleDriver.runPageByURL("https://iju888.net/index.aspx")
 
@@ -34,14 +34,13 @@ def startAutoGamble(parmList : list ):
             # 偵測冷門號碼開獎次數
             GetData.getData(gambleDriver.driver, dataStorage)
 
-
             logging.info("開始下注:")
             print("開始下注:")
 
             dataStorage.indexOfBet = random.sample(dataStorage.indexOfBet, 1)
             betIndexString = ""
             for i in dataStorage.indexOfBet:
-                betIndexString = betIndexString + "第" +str(i+1) + "名  "
+                betIndexString = betIndexString + "第" + str(i + 1) + "名  "
             logging.info("下注名次:  " + betIndexString)
             print("下注名次:  " + betIndexString)
 
@@ -56,17 +55,17 @@ def startAutoGamble(parmList : list ):
                 # 開始執行下注
                 gambleDriver.execute_with_errorLimit(1, gamblesScript.secondPageScript3)
                 dataStorage.betTimeCount += 1
-                if dataStorage.betTime == betTime or (not dataStorage.isMoneyEnough) or dataStorage.betMoneyTotal >= gainMoneyUplimit:
+                if dataStorage.betTime == betTime or (
+                not dataStorage.isMoneyEnough) or dataStorage.betMoneyTotal >= gainMoneyUplimit:
                     dataStorage.ifBet = False
                     break
 
-            if ( (not dataStorage.isMoneyEnough) or dataStorage.betMoneyTotal >= dataStorage.gainMoneyUplimit) : break
+            if ((not dataStorage.isMoneyEnough) or dataStorage.betMoneyTotal >= dataStorage.gainMoneyUplimit): break
 
         print("本輪自動化下注結束，目前餘額：" + str(dataStorage.betMoneyTotal))
         logging.info("本輪自動化下注結束，目前餘額：" + str(dataStorage.betMoneyTotal))
     except Exception as e:
         logging.warning(str(e.args))
-
 
 
 def startLogging():
@@ -76,7 +75,6 @@ def startLogging():
 
 
 if __name__ == "__main__":
-
 
     model = input("請輸入使用模式，模擬模式輸入F, 真實模式輸入T : ")
     coolNumber = input("請輸入要觀察幾門冷門號碼 : ")
@@ -90,18 +88,19 @@ if __name__ == "__main__":
 
     betAmountList = []
     for i in range(int(betTime)):
-       betAmount = input("第"+ str(i+1) + "次下注每一注金額：" ) or 10
-       betAmountList.append(int(betAmount))
+        betAmount = input("第" + str(i + 1) + "次下注每一注金額：") or 10
+        betAmountList.append(int(betAmount))
 
     parmList = [model, int(coolNumber), int(observeTime), int(betTime), betAmountList,
                 int(betMoneyTotal), username, password, int(gainMoneyLimit)]
     print(parmList)
     startLogging()
-    logging.info("設定參數："+str(parmList))
-    print("設定參數："+str(parmList))
+    logging.info("設定參數：" + str(parmList))
+    print("設定參數：" + str(parmList))
 
-    print("開始自動化下注程式，開始時間 -> " + datetime.datetime.now().strftime("%H:%M:%S") )
-    logging.info("開始自動化下注程式，開始時間 -> " + datetime.datetime.now().strftime("%H:%M:%S") )
+    print("開始自動化下注程式，開始時間 -> " + datetime.datetime.now().strftime("%H:%M:%S"))
+    logging.info("開始自動化下注程式，開始時間 -> " + datetime.datetime.now().strftime("%H:%M:%S"))
 
     startAutoGamble(parmList)
 
+    # 1234
