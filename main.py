@@ -34,6 +34,10 @@ def startAutoGamble(parmList: list):
     getDataThread = threading.Thread(target=GetData.getData, args=(gambleDriver.driver, dataStorage))
     getDataThread.start()
     while True:
+
+        if threading.active_count() != 2:
+            raise BaseException("取得資料出錯，重啟程式")
+
         dataStorage.ifBet = dataStorage.ifBetMiddle
         dataStorage.ifBetMiddle = False
 
@@ -135,7 +139,7 @@ if __name__ == "__main__":
             startAutoGamble(parmList)
             break
         except BaseException as e:
-            logging.getLogger("系統執行").warning(str(e.args))
+            logging.getLogger("系統執行").warning(str(e))
             time.sleep(5)
             pass
 
