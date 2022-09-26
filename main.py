@@ -122,20 +122,20 @@ if __name__ == "__main__":
 
     parmList = [model, int(coolNumber), int(observeTime), int(betTime), betAmountList,
                 int(betMoneyTotal), username, password, int(gainMoneyLimit)]
-    print(parmList)
     startLogging()
-    logging.getLogger("系統執行").info("設定參數：" + str(parmList))
-    print("設定參數：" + str(parmList))
 
-    print("開始自動化下注程式，開始時間 -> " + datetime.datetime.now().strftime("%H:%M:%S"))
-    logging.getLogger("系統執行").info("開始自動化下注程式，開始時間 -> " + datetime.datetime.now().strftime("%H:%M:%S"))
 
     while True:
         try:
+            logging.getLogger("系統執行").info("設定參數：" + str(parmList))
+            print("設定參數：" + str(parmList))
+
+            print("開始自動化下注程式，開始時間 -> " + datetime.datetime.now().strftime("%H:%M:%S"))
+            logging.getLogger("系統執行").info("開始自動化下注程式，開始時間 -> " + datetime.datetime.now().strftime("%H:%M:%S"))
             startAutoGamble(parmList)
             break
         except BaseException as e:
             logging.getLogger("系統執行").warning(str(e.args))
-            time.sleep(10)
+            time.sleep(5)
             pass
 
