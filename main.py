@@ -1,5 +1,6 @@
 import datetime
 import random
+import threading
 import time
 import logging
 
@@ -26,52 +27,80 @@ def startAutoGamble(parmList: list):
 
     gambleDriver.execute_with_errorLimit(3, gamblesScript.secondPageScript3_pre)
 
-    try:
+    print("開始偵測")
+    logging.getLogger("系統執行").info("開始偵測")
+
+    # 偵測冷門號碼開獎次數
+    getDataThread = threading.Thread(target=GetData.getData, args=(gambleDriver.driver, dataStorage))
+    getDataThread.start()
+    while True:
+        dataStorage.ifBet = dataStorage.ifBetMiddle
+        dataStorage.ifBetMiddle = False
+
+        if dataStorage.ifBet == False :
+            continue
+        else:
+            pass
+
+
+        logging.getLogger("下注紀錄").info("開始下注:" + dataStorage.period + "期")
+        print("開始下注:" + dataStorage.period + "期")
+
+        dataStorage.indexOfBet = random.sample(dataStorage.indexOfBet, 1)
+        betIndexString = ""
+        for i in dataStorage.indexOfBet:
+            betIndexString = betIndexString + "第" + str(i + 1) + "名  "
+        logging.getLogger("下注紀錄").info("下注名次:  " + betIndexString)
+        print("下注名次:  " + betIndexString)
+
+        betTime = 0
+        dataStorage.betTimeCount = 0
         while True:
-            print("開始偵測")
-            logging.info("開始偵測")
+            gainMoneyUplimit = dataStorage.betMoneyTotal
+            betTime += 1
+            # 準備下注所需的按鍵id 的list
+            GetData.getBetSymbol(gambleDriver.driver, dataStorage)
 
-            # 偵測冷門號碼開獎次數
-            GetData.getData(gambleDriver.driver, dataStorage)
+            # 開始執行下注
+            dataStorage.betTimeCount += 1
+            gambleDriver.execute_with_errorLimit(1, gamblesScript.secondPageScript3)
 
-            logging.info("開始下注:")
-            print("開始下注:")
-
-            dataStorage.indexOfBet = random.sample(dataStorage.indexOfBet, 1)
-            betIndexString = ""
-            for i in dataStorage.indexOfBet:
-                betIndexString = betIndexString + "第" + str(i + 1) + "名  "
-            logging.info("下注名次:  " + betIndexString)
-            print("下注名次:  " + betIndexString)
-
-            betTime = 0
-            dataStorage.betTimeCount = 0
-            while True:
-                gainMoneyUplimit = dataStorage.betMoneyTotal
-                betTime += 1
-                # 準備下注所需的按鍵id 的list
-                GetData.getBetSymbol(gambleDriver.driver, dataStorage)
-
-                # 開始執行下注
-                gambleDriver.execute_with_errorLimit(1, gamblesScript.secondPageScript3)
-                dataStorage.betTimeCount += 1
-                if dataStorage.betTime == betTime or (
-                not dataStorage.isMoneyEnough) or dataStorage.betMoneyTotal >= gainMoneyUplimit:
+            if dataStorage.betTime == betTime \
+               or (not dataStorage.isMoneyEnough) \
+               or dataStorage.betMoneyTotal >= gainMoneyUplimit:
                     dataStorage.ifBet = False
+                    dataStorage.betTimeCount = 0
                     break
 
-            if ((not dataStorage.isMoneyEnough) or dataStorage.betMoneyTotal >= dataStorage.gainMoneyUplimit): break
+        if ((not dataStorage.isMoneyEnough) or dataStorage.betMoneyTotal >= dataStorage.gainMoneyUplimit):
+            dataStorage.ifDetect = False
+            break
 
-        print("本輪自動化下注結束，目前餘額：" + str(dataStorage.betMoneyTotal))
-        logging.info("本輪自動化下注結束，目前餘額：" + str(dataStorage.betMoneyTotal))
-    except Exception as e:
-        logging.warning(str(e.args))
+    getDataThread.join(10)
+
+    print("本輪自動化下注結束，目前餘額：" + str(dataStorage.betMoneyTotal))
+    logging.getLogger("系統執行").info("本輪自動化下注結束，目前餘額：" + str(dataStorage.betMoneyTotal))
+
+
+def setLog(name:str):
+    FORMAT = '%(asctime)s %(levelname)s: %(message)s'
+    FileName = date.today().strftime("%Y年%m月%d日 ") + name + ' 運行日誌.log'
+
+    log = logging.getLogger(name)
+    fileHandler = logging.FileHandler(filename=FileName, mode='a')
+    formatter = logging.Formatter(FORMAT)
+    fileHandler.setFormatter(formatter)
+
+    log.addHandler(fileHandler)
+    log.setLevel(logging.INFO)
+
+    return log
 
 
 def startLogging():
-    FORMAT = '%(asctime)s %(levelname)s: %(message)s'
-    FileName = date.today().strftime("%Y年%m月%d日") + ' 運行日誌.log'
-    logging.basicConfig(level=logging.INFO, filename=FileName, filemode='a', format=FORMAT)
+    setLog("觀察開獎")
+    setLog("下注紀錄")
+    setLog("系統執行")
 
 
 if __name__ == "__main__":
@@ -95,12 +124,18 @@ if __name__ == "__main__":
                 int(betMoneyTotal), username, password, int(gainMoneyLimit)]
     print(parmList)
     startLogging()
-    logging.info("設定參數：" + str(parmList))
+    logging.getLogger("系統執行").info("設定參數：" + str(parmList))
     print("設定參數：" + str(parmList))
 
     print("開始自動化下注程式，開始時間 -> " + datetime.datetime.now().strftime("%H:%M:%S"))
-    logging.info("開始自動化下注程式，開始時間 -> " + datetime.datetime.now().strftime("%H:%M:%S"))
+    logging.getLogger("系統執行").info("開始自動化下注程式，開始時間 -> " + datetime.datetime.now().strftime("%H:%M:%S"))
 
-    startAutoGamble(parmList)
+    while True:
+        try:
+            startAutoGamble(parmList)
+            break
+        except BaseException as e:
+            logging.getLogger("系統執行").warning(str(e.args))
+            time.sleep(10)
+            pass
 
-    # 1234

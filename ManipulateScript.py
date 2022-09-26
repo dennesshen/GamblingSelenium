@@ -24,8 +24,8 @@ class GambleScript:
         inputUsername = self.mainDriver.find_element(By.ID, "txtUser" )
         inputPassword = self.mainDriver.find_element(By.ID, "txtPassword" )
 
-        # "0932736281"
-        # "821341"
+        # "832452"
+        # "rood8879"
         inputUsername.send_keys(self.dataStorage.username)
         inputPassword.send_keys(self.dataStorage.password)
         time.sleep(5)
@@ -77,15 +77,15 @@ class GambleScript:
         needMoney = self.mainDriver.find_element(By.ID, "spnetTotal").get_property("innerText")
 
         print( self.dataStorage.betPeriod + "下注號碼："+str(self.dataStorage.BetSymbolList))
-        logging.info( self.dataStorage.betPeriod + "下注號碼："+str(self.dataStorage.BetSymbolList))
+        logging.getLogger("下注紀錄").info( self.dataStorage.betPeriod + "下注號碼："+str(self.dataStorage.BetSymbolList))
         print("本次下注所需總金額 : " + needMoney)
-        logging.info(("本次下注所需總金額 : " + needMoney))
+        logging.getLogger("下注紀錄").info(("本次下注所需總金額 : " + needMoney))
 
 
         if int(needMoney) > self.dataStorage.betMoneyTotal:
             self.dataStorage.isMoneyEnough = False
             print("餘額剩" + str(self.dataStorage.betMoneyTotal) +"元, 不夠下注，本程式自動關閉")
-            logging.warning("餘額剩" + str(self.dataStorage.betMoneyTotal) +"元, 不夠下注，本程式自動關閉")
+            logging.getLogger("下注紀錄").warning("餘額剩" + str(self.dataStorage.betMoneyTotal) +"元, 不夠下注，本程式自動關閉")
             return
 
         self.dataStorage.betMoneyTotal -= int(needMoney)
